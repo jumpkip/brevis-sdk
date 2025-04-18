@@ -23,6 +23,7 @@ const (
 	Prover_ProveAsync_FullMethodName  = "/sdk.Prover/ProveAsync"
 	Prover_GetProof_FullMethodName    = "/sdk.Prover/GetProof"
 	Prover_DeleteProof_FullMethodName = "/sdk.Prover/DeleteProof"
+	Prover_Health_FullMethodName      = "/sdk.Prover/Health"
 )
 
 // ProverClient is the client API for Prover service.
@@ -34,6 +35,7 @@ type ProverClient interface {
 	ProveAsync(ctx context.Context, in *ProveRequest, opts ...grpc.CallOption) (*ProveAsyncResponse, error)
 	GetProof(ctx context.Context, in *GetProofRequest, opts ...grpc.CallOption) (*GetProofResponse, error)
 	DeleteProof(ctx context.Context, in *DeleteProofRequest, opts ...grpc.CallOption) (*DeleteProofResponse, error)
+	Health(ctx context.Context, in *HealthRequest, opts ...grpc.CallOption) (*HealthResponse, error)
 }
 
 type proverClient struct {
@@ -80,6 +82,15 @@ func (c *proverClient) DeleteProof(ctx context.Context, in *DeleteProofRequest, 
 	return out, nil
 }
 
+func (c *proverClient) Health(ctx context.Context, in *HealthRequest, opts ...grpc.CallOption) (*HealthResponse, error) {
+	out := new(HealthResponse)
+	err := c.cc.Invoke(ctx, Prover_Health_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProverServer is the server API for Prover service.
 // All implementations should embed UnimplementedProverServer
 // for forward compatibility
@@ -89,6 +100,7 @@ type ProverServer interface {
 	ProveAsync(context.Context, *ProveRequest) (*ProveAsyncResponse, error)
 	GetProof(context.Context, *GetProofRequest) (*GetProofResponse, error)
 	DeleteProof(context.Context, *DeleteProofRequest) (*DeleteProofResponse, error)
+	Health(context.Context, *HealthRequest) (*HealthResponse, error)
 }
 
 // UnimplementedProverServer should be embedded to have forward compatible implementations.
@@ -106,6 +118,9 @@ func (UnimplementedProverServer) GetProof(context.Context, *GetProofRequest) (*G
 }
 func (UnimplementedProverServer) DeleteProof(context.Context, *DeleteProofRequest) (*DeleteProofResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteProof not implemented")
+}
+func (UnimplementedProverServer) Health(context.Context, *HealthRequest) (*HealthResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Health not implemented")
 }
 
 // UnsafeProverServer may be embedded to opt out of forward compatibility for this service.
@@ -191,6 +206,24 @@ func _Prover_DeleteProof_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Prover_Health_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HealthRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProverServer).Health(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Prover_Health_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProverServer).Health(ctx, req.(*HealthRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Prover_ServiceDesc is the grpc.ServiceDesc for Prover service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -213,6 +246,10 @@ var Prover_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteProof",
 			Handler:    _Prover_DeleteProof_Handler,
+		},
+		{
+			MethodName: "Health",
+			Handler:    _Prover_Health_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
